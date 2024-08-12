@@ -361,3 +361,7 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+/TinyRenderer/output.tga
+/TinyRenderer/obj/african_head.obj
+/TinyRenderer/obj/african_head_diffuse.tga
+/TinyRenderer/output.tga
