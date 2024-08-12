@@ -85,7 +85,7 @@ int main(int argc, char** argv) {
     //std::cout << pts[2][0] << std::endl;
     image.flip_vertically(); 
     image.write_tga_file("output.tga");
-    //test
+    
     return 0;
 }
 
