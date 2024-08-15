@@ -15,7 +15,7 @@ const int height = 800;
 Model* model = new Model("obj/african_head.obj");
 Vec3f light_dir(0, 0, -1);
 
-//计算重心坐标
+//璁＄畻閲嶅績鍧愭爣
 Vec3f barycentric(Vec3f A, Vec3f B, Vec3f C, Vec3f P) {  
     Vec3f s[2];
     for (int i = 2; i--;) {
@@ -58,7 +58,7 @@ void triangle(Vec3f* pts, float* zbuffer, TGAImage& image, TGAColor color) {
     Vec2f bboxmin(image.get_width() - 1, image.get_height() - 1);
     Vec2f bboxmax(0, 0);
     Vec2f clamp(image.get_width() - 1, image.get_height() - 1);
-    //确定包围盒的范围
+    //纭畾鍖呭洿鐩掔殑鑼冨洿
     for (int i = 0; i < 3; i++) {
         bboxmin.x = std::max(0.f, std::min(bboxmin.x, pts[i].x));
         bboxmin.y = std::max(0.f, std::min(bboxmin.y, pts[i].y));
