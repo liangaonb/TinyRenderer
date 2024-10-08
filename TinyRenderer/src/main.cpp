@@ -85,6 +85,11 @@ void triangle(Vec3f* pts, float* zbuffer, TGAImage& image, TGAColor color) {
 
 int main(int argc, char** argv) {
     TGAImage image(width, height, TGAImage::RGB);
+
+    TGAImage texture;
+    texture.read_tga_file("obj/african_head_diffuse.tga");
+    texture.flip_vertically();
+
     float* zbuffer = new float[width * height];
     for (int i = 0; i < width * height; i++)
         zbuffer[i] = -std::numeric_limits<float>::max();
