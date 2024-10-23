@@ -20,7 +20,7 @@ Model::Model(const char *filename) : verts_(), faces_() {
             for (int i=0;i<3;i++) iss >> v.raw[i];
             verts_.push_back(v);
         } else if (!line.compare(0, 2, "f ")) {
-            std::vector<int> f;
+            std::vector<int> f;//用于保存顶点index
             int itrash, idx;
             iss >> trash;
             while (iss >> idx >> trash >> itrash >> trash >> itrash) {
