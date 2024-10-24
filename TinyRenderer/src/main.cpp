@@ -69,7 +69,7 @@ void line(Vec2i p0, Vec2i p1, TGAImage& image, TGAColor color) {
     }
 }
 
-void triangle(Vec3f* pts, float* zbuffer, TGAImage& image, TGAColor color) {
+void triangle(Vec3f* pts, Vec2f* tex, float* zbuffer, TGAImage& image, TGAImage& texture, float intensity) {
     Vec2f bboxmin(image.get_width() - 1, image.get_height() - 1);
     Vec2f bboxmax(0, 0);
     Vec2f clamp(image.get_width() - 1, image.get_height() - 1);
@@ -81,6 +81,7 @@ void triangle(Vec3f* pts, float* zbuffer, TGAImage& image, TGAColor color) {
         bboxmax.y = std::min(clamp.y, std::max(bboxmax.y, pts[i].y));
     }
     Vec3f P;
+    
     for (P.x = bboxmin.x; P.x <= bboxmax.x; P.x++) {
         for (P.y = bboxmin.y; P.y <= bboxmax.y; P.y++) {
             Vec3f bc = barycentric(pts[0], pts[1], pts[2], P);
@@ -88,10 +89,21 @@ void triangle(Vec3f* pts, float* zbuffer, TGAImage& image, TGAColor color) {
             if (bc.x < 0 || bc.y < 0 || bc.z < 0)//P不在三角形中
                 continue;
             P.z = 0;
-            for (int i = 0; i < 3; i++)
+            Vec2f tex_coords(0, 0);
+            for (int i = 0; i < 3; i++) {
                 P.z += pts[i][2] * bc[i];
+                tex_coords.x += tex[i][0] * bc[i]; //插值纹理坐标
+                tex_coords.y += tex[i][1] * bc[i];
+            }
+               
             if (zbuffer[int(P.x + P.y * width)] < P.z) {//摄像机看向z轴负半轴？
                 zbuffer[int(P.x + P.y * width)] = P.z;
+                //利用纹理坐标获取对应的颜色
+                TGAColor color = texture.get(tex_coords.x * texture.get_width(), tex_coords.y * texture.get_height());
+                for (int i = 0; i < 3; ++i) {
+                    color[i] *= intensity;
+                }
+
                 image.set(P.x, P.y, color);
             }               
         }
@@ -101,7 +113,12 @@ void triangle(Vec3f* pts, float* zbuffer, TGAImage& image, TGAColor color) {
 int main(int argc, char** argv) {
     TGAImage image(width, height, TGAImage::RGB);
 
-    
+    TGAImage texture;
+    if (!texture.read_tga_file("obj/african_head_diffuse.tga")) { //读取纹理贴图
+        std::cerr << "failed to load texture file!" << std::endl;
+        return -1;
+    }
+    texture.flip_vertically();
 
     float* zbuffer = new float[width * height];
     for (int i = 0; i < width * height; i++)
@@ -109,20 +126,24 @@ int main(int argc, char** argv) {
     
     for (int i = 0; i < model->nfaces(); i++) {
         std::vector<int> face = model->face(i);
+        std::vector<int> tex_face = model->texface(i);
         Vec3f screen_coords[3];
         Vec3f world_coords[3];
+        Vec2f tex_coords[3];
+
         for (int j = 0; j < 3; j++) {
             Vec3f v = model->vert(face[j]);
             screen_coords[j] = world2screen(v);
             //std::cout << screen_coords[j] << std::endl;
             world_coords[j] = v;
             //std::cout << world_coord[j] << std::endl;
+            tex_coords[j] = model->texcoord(tex_face[j]);
         }
         Vec3f n = (world_coords[1] - world_coords[0]) ^ (world_coords[2] - world_coords[0]);
         n.normalize();
         float intensity = n * light_dir;//dot product
         if (intensity > 0)
-            triangle(screen_coords, zbuffer, image, TGAColor(intensity * 255, intensity * 255, intensity * 255, 255));
+            triangle(screen_coords, tex_coords, zbuffer, image, texture, intensity);
     }
 
     /*for (int i = 0; i < width*height; i++)

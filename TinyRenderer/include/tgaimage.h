@@ -25,7 +25,7 @@ struct TGA_Header {
 struct TGAColor {
 	union {
 		struct {
-			unsigned char b, g, r, a;
+			unsigned char b, g, r, a; //×¢Òâ´æ´¢µÄË³Ğò
 		};
 		unsigned char raw[4];
 		unsigned int val;
@@ -56,6 +56,14 @@ struct TGAColor {
 			val = c.val;
 		}
 		return *this;
+	}
+
+	unsigned char& operator[](const int i) {
+		return raw[i];
+	}
+
+	const unsigned char& operator[](const int i) const {
+		return raw[i];
 	}
 };
 
